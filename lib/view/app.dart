@@ -7,6 +7,7 @@ import 'package:app/view/ndef_format.dart';
 import 'package:app/view/ndef_write.dart';
 import 'package:app/view/ndef_write_lock.dart';
 import 'package:app/view/tag_read.dart';
+import 'package:app/view/tag_insomniac.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -44,6 +45,13 @@ class _Home extends StatelessWidget {
         padding: EdgeInsets.all(2),
         children: [
           FormSection(children: [
+            FormRow(
+              title: Text('Tag - Insomniac'),
+              trailing: Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context, MaterialPageRoute(
+                builder: (context) => TagInsomniacPage.withDependency(),
+              )),
+            ),
             FormRow(
               title: Text('Tag - Read'),
               trailing: Icon(Icons.chevron_right),
