@@ -253,32 +253,41 @@ class _TagInfo extends StatelessWidget {
     }
 
     var tagData = "";
-
+    if (Platform.isAndroid) {
+      tagId = (
+        NfcA.from(tag)?.identifier ??
+        NfcB.from(tag)?.identifier ??
+        NfcF.from(tag)?.identifier ??
+        NfcV.from(tag)?.identifier ??
+        Uint8List(0)
+      ).toHexString();
+    }
+    
     if (Platform.isIOS) {
       tagId = MiFare.from(tag)?.identifier.toHexString();
-
-      tech = Ndef.from(tag);
-      if (tech is Ndef) {
-        final cachedMessage = tech.cachedMessage;
-        if (cachedMessage != null)
-          Iterable.generate(cachedMessage.records.length).forEach((i) {
-            final record = cachedMessage.records[i];
-            final info = NdefRecordInfo.fromNdef(record);
-            tagData = info.subtitle;
-            ndefWidgets.add(FormRow(
-              title: Text('#$i ${info.title}'),
-              subtitle: Text('${info.subtitle}'),
-              trailing: Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(context, MaterialPageRoute(
-                builder: (context) => NdefRecordPage(i, record),
-              )),
-            ));
-          });
-      }
-      // final tagData = NdefRecordInfo.fromNdef(Ndef.from(tag).cachedMessage.records[0]).title;
-      insomniacWidgets.add(FormRow(title: Text('$tagId'),
-            subtitle: Text('$tagData')));
     }
+
+    tech = Ndef.from(tag);
+    if (tech is Ndef) {
+      final cachedMessage = tech.cachedMessage;
+      if (cachedMessage != null)
+        Iterable.generate(cachedMessage.records.length).forEach((i) {
+          final record = cachedMessage.records[i];
+          final info = NdefRecordInfo.fromNdef(record);
+          tagData = info.subtitle;
+          ndefWidgets.add(FormRow(
+            title: Text('#$i ${info.title}'),
+            subtitle: Text('${info.subtitle}'),
+            trailing: Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(context, MaterialPageRoute(
+              builder: (context) => NdefRecordPage(i, record),
+            )),
+          ));
+        });
+    }
+    // final tagData = NdefRecordInfo.fromNdef(Ndef.from(tag).cachedMessage.records[0]).title;
+    insomniacWidgets.add(FormRow(title: Text('$tagId'),
+          subtitle: Text('$tagData')));
     return Column(
       children: [
         FormSection(
