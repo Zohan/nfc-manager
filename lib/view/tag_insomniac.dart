@@ -62,7 +62,7 @@ class TagInsomniacModel with ChangeNotifier {
   NfcTag? tag;
 
   Map<String, dynamic>? additionalData;
-  static final BASE_URL = "http://192.168.1.17:8080/";
+  static final BASE_URL = "http://zohii.com:8080/";
   static final CHECK_POST_URL = "checkTagData";
   static final UPDATE_POST_URL = "updateTagData";
 
