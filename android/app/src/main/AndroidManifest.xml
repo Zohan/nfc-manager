@@ -2,7 +2,7 @@
     package="com.naokiokada.nfcmanager">
     <uses-permission android:name="android.permission.NFC"/>
    <application
-        android:label="Insomanic NFC"
+        android:label="Insomniac NFC"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name="com.naokiokada.nfcmanager.MainActivity"
