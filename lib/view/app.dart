@@ -40,7 +40,7 @@ class _Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('NFC Manager'),
+        title: Text('Insomniac NFC Manager'),
       ),
       body: ListView(
         padding: EdgeInsets.all(2),
