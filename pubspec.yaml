@@ -14,6 +14,7 @@ dependencies:
   provider:
   sqflite:
   url_launcher:
+  http:
 
 dev_dependencies:
   flutter_test:
