@@ -13,7 +13,18 @@ import 'package:nfc_manager/nfc_manager.dart';
 import 'package:nfc_manager/platform_tags.dart';
 import 'package:provider/provider.dart';
 
-String userName = DateTime.now().millisecondsSinceEpoch.remainder(100000).toString();
+Future createPost(String url, Map body) async {
+  print(url);
+  print(body);
+  return http.post(Uri.parse(url), body: body).then((http.Response response) {
+    final int statusCode = response.statusCode;
+    print(statusCode);
+    if (statusCode < 200 || statusCode > 400 || json == null) {
+      throw new Exception("Error while fetching data");
+    }
+    return CheckTagPost.fromJson(json.decode(response.body));
+  });
+}
 
 class CheckTagPost {
   // New Fields TBD 
@@ -62,22 +73,6 @@ class TagInsomniacModel with ChangeNotifier {
   NfcTag? tag;
 
   Map<String, dynamic>? additionalData;
-  static final BASE_URL = "http://192.168.1.17:8080/";
-  static final CHECK_POST_URL = "checkTagData";
-  static final UPDATE_POST_URL = "updateTagData";
-
-  Future<String?> createPost(String url, Map body) async {
-    print("GOING!!!\n\n");
-    return http.post(Uri.parse(url), body: body).then((http.Response response) {
-      final int statusCode = response.statusCode;
-      if (statusCode < 200 || statusCode > 400 || json == null) {
-        throw new Exception("Error while fetching data");
-      }
-
-      print("GlobalResult :" + json.decode(response.body));
-      return json.decode(response.body).toString();
-    });
-  }
 
   Future<String?> handleTag(NfcTag tag) async {
     this.tag = tag;
@@ -97,52 +92,23 @@ class TagInsomniacModel with ChangeNotifier {
         additionalData!['manufacturerParameter'] = polling.manufacturerParameter;
       }
     }
-    var tagId;
-    var tagData = "";
 
-    if (Platform.isAndroid) {
-      tagId = (
-        NfcA.from(tag)?.identifier ??
-        NfcB.from(tag)?.identifier ??
-        NfcF.from(tag)?.identifier ??
-        NfcV.from(tag)?.identifier ??
-        Uint8List(0)
-      ).toHexString();
-    }
-    
-    if (Platform.isIOS) {
-      tagId = MiFare.from(tag)?.identifier.toHexString();
-    }
-    // Remove spaces.
-    tagId = tagId.replaceAll(" ", "");
-    tech = Ndef.from(tag);
-    if (tech is Ndef) {
-      final cachedMessage = tech.cachedMessage;
-      if (cachedMessage != null)
-        Iterable.generate(cachedMessage.records.length).forEach((i) {
-          final record = cachedMessage.records[i];
-          final info = NdefRecordInfo.fromNdef(record);
-          tagData = info.subtitle;
-        });
-    }
-    CheckTagPost newPost = new CheckTagPost(userId: "123", id: 0, name: userName, email: "test@gmail.com", password: "test", tag: tagId, tagData: tagData, device: "00:20");
-    final postResult = await createPost(BASE_URL+CHECK_POST_URL, newPost.toMap());
     notifyListeners();
-    return postResult;
+    return '[Tag - Initialize] is completed.';
   }
 }
 
-class TagInsomniacPage extends StatelessWidget {
+class TagInsomniacInitializePage extends StatelessWidget {
   static Widget withDependency() => ChangeNotifierProvider<TagInsomniacModel>(
     create: (context) => TagInsomniacModel(),
-    child: TagInsomniacPage(),
+    child: TagInsomniacInitializePage(),
   );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tag - Insomniac'),
+        title: Text('Tag - Insomniac Initialize'),
       ),
       body: ListView(
         padding: EdgeInsets.all(2),
@@ -176,6 +142,8 @@ class _TagInfo extends StatelessWidget {
   _TagInfo(this.tag, this.additionalData);
 
   final NfcTag tag;
+  static final BASE_URL = "http://192.168.1.17:8080/";
+  static final CHECK_POST_URL = "initializeTag";
 
   final Map<String, dynamic> additionalData;
 
@@ -185,10 +153,11 @@ class _TagInfo extends StatelessWidget {
     final ndefWidgets = <Widget>[];
     final insomniacWidgets = <Widget>[];
     var tagId;
-    var tagData = "";
     final Future post;
 
     Object? tech;
+
+    var tagData = "";
     if (Platform.isAndroid) {
       tagId = (
         NfcA.from(tag)?.identifier ??
@@ -221,8 +190,15 @@ class _TagInfo extends StatelessWidget {
           ));
         });
     }
+    // final tagData = NdefRecordInfo.fromNdef(Ndef.from(tag).cachedMessage.records[0]).title;
     insomniacWidgets.add(FormRow(title: Text('$tagId'),
-      subtitle: Text('$tagData')));
+          subtitle: Text('$tagData')));
+    tagId = tagId.replaceAll(" ", "");
+    print("TagId:" + tagId);
+    CheckTagPost newPost = new CheckTagPost(userId: "123", id: 0, name: "Hisato", email: "aaa@gmail.com", password: "aaa", tag: tagId, tagData: tagData, device: "00:20");
+    // Post newPost = new Post(userId: "123", id: 0, name: "HisatoTownBoi", title: "AAA", body: "Aaaa");
+    final postResult = createPost(BASE_URL+CHECK_POST_URL, newPost.toMap());
+    print(postResult);
                         
     return Column(
       children: [
